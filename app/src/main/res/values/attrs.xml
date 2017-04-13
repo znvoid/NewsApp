@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TimeBaseView">
+        <attr name="android:textSize"/>
+        <attr name="android:textColor"/>
+        <!-- 时间线所在的位置-->
+        <attr name="timeLine" format="fraction"/>
+        <!-- 时间线大小-->
+        <attr name="timeLineSize" format="integer"/>
+        
+        
+        
+    </declare-styleable>
+    
+    <declare-styleable name="CircleImageView">
+        <attr name="border_width" format="dimension"/>
+        <attr name="border_color" format="color" />
+    </declare-styleable>
+    
+    
+    
+    
+    
+</resources>

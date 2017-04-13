@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">NewsApp</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">设置</string>
+    <string name="zxing">二维码扫描</string>
+
+    <string name="title_news">新闻阅读</string>
+    <string name="news_read">新闻阅读</string>
+    <string name="activity_weather">天气</string>
+
+
+</resources>

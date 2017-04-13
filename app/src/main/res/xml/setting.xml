@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PreferenceScreen
+    android:layout="@layout/preference_item"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/action_settings">
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:key="user_info"
+        android:title="个人信息设置" >
+        <CheckBoxPreference
+            android:layout="@layout/preference_item"
+            android:key="yesno_save__info"
+            android:title="是否保存个人信息"
+            android:summaryOff="保存"
+            android:summaryOn="不保存"
+            android:defaultValue="false"/>
+        <EditTextPreference
+            android:layout="@layout/preference_item"
+            android:key="user_info_name"
+            android:summary="请输入真实姓名"
+            android:title="姓名 " />
+        <EditTextPreference
+            android:layout="@layout/preference_item"
+            android:key="user_info_city"
+            android:summary="杭州"
+            android:title="所属城市" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="人性化自由选择">
+
+        <CheckBoxPreference
+            android:layout="@layout/preference_item"
+            android:title="3G/4G网络流量"
+            android:summaryOff="关闭"
+            android:summaryOn="打开"
+            android:defaultValue="false"/>
+        <CheckBoxPreference
+            android:layout="@layout/preference_item"
+            android:title="推送通知"
+            android:summaryOff="关闭"
+            android:summaryOn="打开"
+            android:defaultValue="true"/>
+        <CheckBoxPreference
+            android:layout="@layout/preference_item"
+            android:title="开机自启动"
+            android:summaryOn="自启"
+            android:summaryOff="禁止"
+            android:defaultValue="true"/>
+        <SwitchPreference
+            android:layout="@layout/preference_item"
+            android:title="夜间模式"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="帮助">
+        <Preference
+            android:layout="@layout/preference_item"
+            android:title="关于">
+
+            <!--<intent-->
+                <!--android:action="android.intent.action.VIEW"-->
+                <!--android:data="http://fir.im/seashell"/>-->
+        </Preference>
+
+        <Preference
+            android:layout="@layout/preference_item"
+            android:title="手动检查更新">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="http://www.baidu.com"/>
+        </Preference>
+
+        <Preference
+            android:layout="@layout/preference_item"
+            android:title="点个赞"
+            android:summary="若你觉得很赞的话，非常感谢">
+          />
+        </Preference>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:layout="@layout/preference_category_widget"
+        android:title="感谢有你">
+
+        <Preference
+            android:layout="@layout/preference_item"
+            android:title="退出登录"/>
+    </PreferenceCategory>
+</PreferenceScreen>
