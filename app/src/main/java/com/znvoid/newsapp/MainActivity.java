@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.znvoid.newsapp.model.ApiWorkManager;
 import com.znvoid.newsapp.presenter.Presenter;
@@ -16,6 +18,9 @@ import com.znvoid.newsapp.presenter.Presenter;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private Presenter presenter;
+    private TextView nameText;
+    private TextView cityText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,7 +30,14 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                nameText.setText(presenter.getDataFromPerference("user_info_name","Android studio"));
+                cityText.setText(presenter.getDataFromPerference("user_info_city","Android studio"));
+            }
+        };
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
@@ -38,6 +50,9 @@ public class MainActivity extends AppCompatActivity
         presenter.StartFragemt();
         toolbar.setTitle(R.string.title_news);
         getSupportActionBar().setTitle(R.string.title_news);
+
+        nameText = (TextView)navigationView.getHeaderView(0).findViewById(R.id.main_head_name);
+        cityText = (TextView)navigationView.getHeaderView(0).findViewById(R.id.main_head_city);
     }
 
     @Override
@@ -91,7 +106,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_camera) {
             presenter.startZxing();
         } else if (id == R.id.nav_share) {
-
+                presenter.showBottomSheet();
         }else if (id == R.id.nav_weather) {
             presenter.jumpToWeatherActivity();
         } else if (id == R.id.nav_set) {
@@ -103,6 +118,8 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-
+    public void onClick(View view){
+        presenter.onClick(view);
+    }
 
 }

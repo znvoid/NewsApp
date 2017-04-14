@@ -4,13 +4,17 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.view.View;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSON;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.znvoid.newsapp.MainActivity;
@@ -42,7 +46,8 @@ public class Presenter implements NewsLoadLisenter<Channel>,LogicLink{
     private WeakReference<MainActivity> activityWeakReference;
     private ShowImagePopup showImagePopup;
     private SharedPreferences sp;
-
+    private BottomSheetBehavior<NestedScrollView> bottomSheetBehavior;
+    private Handler mHandler=new Handler(Looper.getMainLooper());
     private Presenter() {
     }
     public static Presenter getInstance(){
@@ -67,19 +72,49 @@ public class Presenter implements NewsLoadLisenter<Channel>,LogicLink{
             ApiWorkManager.getInstance().setPage(sp.getInt("page", 1));
 
         }
+        initView();
     }
+    private void initView(){
+        MainActivity activity=activityWeakReference.get();
+        NestedScrollView nestedScrollView= (NestedScrollView) activity.findViewById(R.id.share_bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(nestedScrollView);
 
+    }
 //添加新闻阅读界面
     public void StartFragemt(){
+        LoadingView view= (LoadingView) activityWeakReference.get().findViewById(R.id.content_loadingview);
+        String userChannelsString= getDataFromPerference("userNewsChannels","");
+        if (userChannelsString!=null&&!userChannelsString.equals("")){
+            final List<Channel> channels = JSON.parseArray(userChannelsString, Channel.class);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    onComplete(channels);
+                }
+            },2000);
 
-        List<Fragment> fragments = activityWeakReference.get().getSupportFragmentManager().getFragments();
-        if (fragments!=null) {
-            System.out.println(fragments.size());
-            System.out.println(fragments.get(0) instanceof NewsFragment);
+        }else {
+
+            String channelsString= getDataFromPerference("newsChannels","");
+            if (channelsString!=null&&!channelsString.equals("")){
+                final List<Channel> channels = JSON.parseArray(channelsString, Channel.class);
+
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        onComplete(channels);
+                    }
+                },2000);
+
+
+            }else {
+                ApiWorkManager.getInstance().getNewsChannel(this);
+            }
 
         }
-        ApiWorkManager.getInstance().getNewsChannel(this);
-        LoadingView view= (LoadingView) activityWeakReference.get().findViewById(R.id.content_loadingview);
+
+
+
         view.startAmin();
         view.setVisibility(View.VISIBLE);
         activityWeakReference.get().getSupportActionBar().setTitle("新闻阅读");
@@ -102,8 +137,6 @@ public class Presenter implements NewsLoadLisenter<Channel>,LogicLink{
             for (int i = 0; i < items.size(); i++) {
                 channelIds.add(items.get(i).getChannelId());
                 channelNames.add(items.get(i).getName());
-
-
             }
             NewsFragment newsFragment=new NewsFragment();
             Bundle bundle=new Bundle();
@@ -182,6 +215,18 @@ public class Presenter implements NewsLoadLisenter<Channel>,LogicLink{
     public String getDataFromPerference(String key,String defaul) {
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(activityWeakReference.get());
         return defaultSharedPreferences.getString(key,defaul);
+    }
+
+    @Override
+    public void onClick(View view) {
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        showToast("暂不支持此功能");
+
+    }
+
+    @Override
+    public void showBottomSheet() {
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
     public void jumpToSettingActivity(){

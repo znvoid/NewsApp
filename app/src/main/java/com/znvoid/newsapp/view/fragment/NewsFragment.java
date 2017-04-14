@@ -1,6 +1,8 @@
 package com.znvoid.newsapp.view.fragment;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -30,19 +32,22 @@ public class NewsFragment extends Fragment {
     ViewPager viewpage;
 
     List<Channel> chanels=new ArrayList<>();
-    NewsPage[] pages;
+    List<NewsPage> pages;
+    private List<String> channelIds;
+    private List<String> channelNames;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       List<String> channelIds=getArguments().getStringArrayList("channelIds");
-       List<String> channelNames=getArguments().getStringArrayList("channelNames");
-
-        if (channelNames!=null&&channelIds!=null){
-            for (int i = 0; i < channelIds.size()&&i<11; i++) {
-                chanels.add(new Channel(channelIds.get(i),channelNames.get(i)));
-
+        channelIds = getArguments().getStringArrayList("channelIds");
+        channelNames = getArguments().getStringArrayList("channelNames");
+        pages =new ArrayList<>(channelIds.size());
+        if (channelNames !=null&& channelIds !=null){
+            for (int i = 0; i < channelIds.size(); i++) {
+                chanels.add(new Channel(channelIds.get(i), channelNames.get(i)));
+                pages.add(i,null);
             }
-            pages =new NewsPage[chanels.size()];
+
         }
 
 
@@ -70,23 +75,16 @@ public class NewsFragment extends Fragment {
         viewpage.setAdapter(new FragmentStatePagerAdapter(getActivity().getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
-                if (pages[position]==null) {
-                    NewsPage fragment = new NewsPage();
-                    Bundle bundle = new Bundle();
-                    bundle.putString("channelId", chanels.get(position).getChannelId());
-                    bundle.putString("channelName", chanels.get(position).getName());
-                    if (position==0)
-                        bundle.putBoolean("init", true);
-                    fragment.setArguments(bundle);
-                    pages[position]=fragment;
-                }
 
-                return pages[position] ;
+                if (pages.get(position)==null) {
+                    creatNewsPager(position);
+                }
+                return pages.get(position) ;
             }
 
             @Override
             public int getCount() {
-                return chanels.size();
+                return pages.size();
             }
 
             @Override
@@ -103,7 +101,9 @@ public class NewsFragment extends Fragment {
 
             @Override
             public void onPageSelected(int position) {
-                pages[position].beginRefresh(true);
+               mHander.removeCallbacks(mRunnable);
+                mRunnable.setPosition(position);
+                mHander.postDelayed(mRunnable,800);
             }
 
             @Override
@@ -114,6 +114,30 @@ public class NewsFragment extends Fragment {
         tableLayout.setupWithViewPager(viewpage);
         viewpage.setCurrentItem(0);
     }
+    private Handler mHander=new Handler(Looper.getMainLooper());
+    private  MRunnable mRunnable=new MRunnable();
+    private class MRunnable implements Runnable{
 
+        private int position=0;
+        @Override
+        public void run() {
+            pages.get(position).beginRefresh(true);
+        }
 
+        public void setPosition(int position) {
+            this.position = position;
+        }
+    }
+    private void creatNewsPager(int position){
+
+        NewsPage fragment = new NewsPage();
+        Bundle bundle = new Bundle();
+        bundle.putString("channelId", chanels.get(position).getChannelId());
+        bundle.putString("channelName", chanels.get(position).getName());
+        if (position==0)
+            bundle.putBoolean("init", true);
+        fragment.setArguments(bundle);
+        pages.set(position,fragment);
+
+    }
 }

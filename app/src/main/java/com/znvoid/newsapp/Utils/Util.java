@@ -33,7 +33,7 @@ public class Util {
     //返回今天日期
     public static String getCurrentTime(){
         Date date=new Date(System.currentTimeMillis());
-        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-mm-dd");
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
        return sdf.format(date);
     }
 

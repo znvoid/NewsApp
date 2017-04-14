@@ -1,12 +1,14 @@
 package com.znvoid.newsapp.view.activity;
 
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -19,6 +21,8 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.znvoid.newsapp.R;
 import com.znvoid.newsapp.Utils.Util;
 import com.znvoid.newsapp.bean.FutureWeather;
@@ -29,13 +33,16 @@ import com.znvoid.newsapp.model.ApiWorkManager;
 import com.znvoid.newsapp.model.LoadLisenter;
 import com.znvoid.newsapp.presenter.Presenter;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Created by zn on 2017/4/13.
  */
 
 public class WeatherActivity extends AppCompatActivity implements LoadLisenter<WeatherRespondBody>, SwipeRefreshLayout.OnRefreshListener {
 
-
+    private static final String TAG = "WeatherActivity";
     private ImageView bgPicImg;//背景图片
     private ScrollView weatherLayout;
     private ImageView weatherPic;//天气图片
@@ -50,6 +57,7 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
     private TextView qualityText; //天气质量
     private TextView titleCity;
     private TextView titleTime;
+    private ImageLoadListener imageLoadListener;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,6 +71,7 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_weather);
         initView();
+        imageLoadListener = new ImageLoadListener();
     }
 
     /**
@@ -113,8 +122,13 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
     }
     private void requestNetWork(){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String city= prefs.getString("user_info_city","杭州");
-        ApiWorkManager.getInstance().getWeather(city,this);
+        if (prefs.getBoolean("yesno_save__info",false)){
+            String city= prefs.getString("user_info_city","杭州");
+            ApiWorkManager.getInstance().getWeather(city,this);
+        }else {
+            ApiWorkManager.getInstance().getWeather(this);
+        }
+
     }
 
 
@@ -122,7 +136,7 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
         NowWeather nowWeather=item.getNow();
         titleCity.setText(nowWeather.getAqiDetail().getArea());
         titleTime.setText(nowWeather.getTemperature_time());
-        ImageLoader.getInstance().displayImage(nowWeather.getWeather_pic(),weatherPic);
+        ImageLoader.getInstance().displayImage(nowWeather.getWeather_pic(),weatherPic,imageLoadListener);
         degreeText.setText(nowWeather.getTemperature());
         weatherStatText.setText(nowWeather.getWeather());
         weatherWindText.setText(nowWeather.getWind_direction()+"    "+nowWeather.getWind_power());
@@ -151,7 +165,7 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
         TextView degreeText = (TextView) view.findViewById(R.id.future_weather_temperature_text);
         String date=futureWeather.getDay().substring(0,4)+"-"+futureWeather.getDay().substring(4,6)+"-"+futureWeather.getDay().substring(6,8);
         dateText.setText(date);
-        ImageLoader.getInstance().displayImage(futureWeather.getDay_weather_pic(),img);
+        ImageLoader.getInstance().displayImage(futureWeather.getDay_weather_pic(), img,imageLoadListener);
         infoText.setText(futureWeather.getDay_weather());
         degreeText.setText(futureWeather.getDay_air_temperature()+"℃ ～ "+futureWeather.getNight_air_temperature()+"℃");
         weatherFutureLayout.addView(view);
@@ -177,5 +191,24 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
     @Override
     public void onRefresh() {
         requestNetWork();
+    }
+
+    private class ImageLoadListener extends SimpleImageLoadingListener {
+        @Override
+        public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+           if (view!=null&&view instanceof ImageView){
+               String path=imageUri.replace("http://app1.showapi.com/weather/","");
+               try {
+                  InputStream inputStream= getResources().getAssets().open(path);
+                   ((ImageView) view).setImageBitmap(BitmapFactory.decodeStream(inputStream));
+
+               } catch (IOException e) {
+                   Log.e(TAG, "onLoadingFailed: 加载图片失败" );
+                   e.printStackTrace();
+               }
+
+           }
+
+        }
     }
 }

@@ -21,6 +21,7 @@ import com.znvoid.newsapp.bean.PictureRespondBody;
 import com.znvoid.newsapp.bean.WeatherRespondBody;
 import com.znvoid.newsapp.presenter.Presenter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -106,7 +107,7 @@ public class ApiWorkManager {
         new ApiRequest(Api.GET_CHANNEL_API, new ApiRequest.Listener() {
             @Override
             public void onResponse(String response) {
-
+                response = response.replaceAll("焦点", "");
                 try {
                     ApiRespond<ChannelRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<ChannelRespondBody>>() {
                     });
@@ -116,6 +117,14 @@ public class ApiWorkManager {
                         ChannelRespondBody body = apiRespond.getShowapi_res_body();
                         List<Channel> channels = body.getChannelList();
                         if (channels != null && channels.size() > 0) {
+                            String channelsJsonString = JSON.toJSONString(channels);
+                            Presenter.getInstance().saveDataToPreference("newChannels", channelsJsonString);
+                            List<Channel> userChannels=new ArrayList<>();
+                            for (int i = 0; i < 10; i++) {
+                                userChannels.add(channels.get(i));
+                            }
+                            String userString=JSON.toJSONString(userChannels);
+                            Presenter.getInstance().saveDataToPreference("userNewsChannels",userString);
                             loadLisenter.onComplete(channels);
                         } else {
                             loadLisenter.onError();
@@ -240,13 +249,13 @@ public class ApiWorkManager {
 
             @Override
             public void onResponse(String response) {
-               // System.out.println(response);
+                // System.out.println(response);
                 try {
                     ApiRespond<ExpressRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<ExpressRespondBody>>() {
                     });
-                    if (apiRespond.getShowapi_res_code() == 0&&"000".equals(apiRespond.getShowapi_res_body().getError_code())) {
+                    if (apiRespond.getShowapi_res_code() == 0 && "000".equals(apiRespond.getShowapi_res_body().getError_code())) {
 
-                            loadLisenter.onComplete(apiRespond.getShowapi_res_body());
+                        loadLisenter.onComplete(apiRespond.getShowapi_res_body());
                     } else {
                         loadLisenter.onError();
                     }
@@ -276,7 +285,7 @@ public class ApiWorkManager {
     }
 
 
-    public void getWeather(String area,final LoadLisenter<WeatherRespondBody> loadLisenter){
+    public void getWeather(String area, final LoadLisenter<WeatherRespondBody> loadLisenter) {
 
         new ApiRequest(Api.GET_WEATHER_BY_EAR_API, new ApiRequest.Listener() {
 
@@ -284,24 +293,24 @@ public class ApiWorkManager {
             public void onResponse(String response) {
                 // System.out.println(response);
                 try {
-                    ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<WeatherRespondBody>>() {});
-                    if (apiRespond.getShowapi_res_code()==0){
-                        WeatherRespondBody weatherRespondBody=apiRespond.getShowapi_res_body();
-                        if (weatherRespondBody.getRet_code()==0){
-                            Presenter.getInstance().saveDataToPreference("weather",response);
+                    ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<WeatherRespondBody>>() {
+                    });
+                    if (apiRespond.getShowapi_res_code() == 0) {
+                        WeatherRespondBody weatherRespondBody = apiRespond.getShowapi_res_body();
+                        if (weatherRespondBody.getRet_code() == 0) {
+                            Presenter.getInstance().saveDataToPreference("weather", response);
                             Presenter.getInstance().saveDataToPreference("weatherUpdataTime", Util.getCurrentTime());
                             loadLisenter.onComplete(weatherRespondBody);
-                        }else if(weatherRespondBody.getRet_code()==-1){
+                        } else if (weatherRespondBody.getRet_code() == -1) {
                             Presenter.getInstance().showToast("选择的城市错误！将自动获取本地天气信息");
-                           getWeather(loadLisenter);
+                            getWeather(loadLisenter);
 
-                        }else {
+                        } else {
                             loadLisenter.onError();
                         }
 
 
-
-                    }else {
+                    } else {
                         loadLisenter.onError();
 
                     }
@@ -318,11 +327,12 @@ public class ApiWorkManager {
                 loadLisenter.onError();
             }
         }).addParemeter("area", area)
-                .addParemeter("needMoreDay","1")
+                .addParemeter("needMoreDay", "1")
                 .post(queue);
 
     }
-    public void getWeather(final LoadLisenter<WeatherRespondBody> loadLisenter){
+
+    public void getWeather(final LoadLisenter<WeatherRespondBody> loadLisenter) {
 
         new ApiRequest(Api.GET_WEATHER_BY_IP_API, new ApiRequest.Listener() {
 
@@ -330,17 +340,19 @@ public class ApiWorkManager {
             public void onResponse(String response) {
                 // System.out.println(response);
                 try {
-                    ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<WeatherRespondBody>>() {});
-                    if (apiRespond.getShowapi_res_code()==0){
-                        WeatherRespondBody weatherRespondBody=apiRespond.getShowapi_res_body();
-                        if (weatherRespondBody.getRet_code()==0){
-
+                    ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<WeatherRespondBody>>() {
+                    });
+                    if (apiRespond.getShowapi_res_code() == 0) {
+                        WeatherRespondBody weatherRespondBody = apiRespond.getShowapi_res_body();
+                        if (weatherRespondBody.getRet_code() == 0) {
+                            Presenter.getInstance().saveDataToPreference("weather", response);
+                            Presenter.getInstance().saveDataToPreference("weatherUpdataTime", Util.getCurrentTime());
                             loadLisenter.onComplete(weatherRespondBody);
-                        }else {
+                        } else {
                             loadLisenter.onError();
                         }
 
-                    }else {
+                    } else {
                         loadLisenter.onError();
 
                     }
@@ -356,8 +368,7 @@ public class ApiWorkManager {
             public void onErrorResponse(VolleyError error) {
                 loadLisenter.onError();
             }
-        }). addParemeter("needMoreDay","1").post(queue);
-
+        }).addParemeter("needMoreDay", "1").post(queue);
 
 
     }

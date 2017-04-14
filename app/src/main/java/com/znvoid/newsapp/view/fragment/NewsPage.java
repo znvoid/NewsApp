@@ -88,7 +88,11 @@ public class NewsPage extends Fragment implements SwipeRefreshLayout.OnRefreshLi
     @Override
     public void onComplete(List<Item> items) {
         mSwiperefresh.setRefreshing(false);
-        adapter.setNews(items);
+        if (adapter.getLoadMoreFlag()){
+            adapter.setLoadMoreData(items);
+        }else {
+            adapter.setNews(items);
+        }
         if (mRecyclerview.getAdapter()==null)
             init();
     }
@@ -96,6 +100,8 @@ public class NewsPage extends Fragment implements SwipeRefreshLayout.OnRefreshLi
     @Override
     public void onError() {
         mSwiperefresh.setRefreshing(false);
+        if (adapter.getLoadMoreFlag())
+            adapter.setLoadMoreData(null);
         Toast.makeText(getContext(),"加载失败",Toast.LENGTH_SHORT).show();
     }
 
@@ -117,8 +123,10 @@ public class NewsPage extends Fragment implements SwipeRefreshLayout.OnRefreshLi
             onRefresh();
         }
 
+    }
+    public void beginLoadMore(){
 
-
+        onRefresh();
     }
 
 }
