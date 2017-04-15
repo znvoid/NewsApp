@@ -2,11 +2,13 @@ package com.znvoid.newsapp;
 
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +16,9 @@ import android.widget.TextView;
 
 import com.znvoid.newsapp.model.ApiWorkManager;
 import com.znvoid.newsapp.presenter.Presenter;
+import com.znvoid.newsapp.view.fragment.NewsFragment;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -30,12 +35,12 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                nameText.setText(presenter.getDataFromPerference("user_info_name","Android studio"));
-                cityText.setText(presenter.getDataFromPerference("user_info_city","Android studio"));
+                nameText.setText(presenter.getDataFromPerference("user_info_name", "Android studio"));
+                cityText.setText(presenter.getDataFromPerference("user_info_city", "Android studio"));
             }
         };
         drawer.setDrawerListener(toggle);
@@ -45,14 +50,14 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         ApiWorkManager.getInstance().init(this);
-        presenter=Presenter.getInstance();
+        presenter = Presenter.getInstance();
         presenter.init(this);
         presenter.StartFragemt();
         toolbar.setTitle(R.string.title_news);
         getSupportActionBar().setTitle(R.string.title_news);
 
-        nameText = (TextView)navigationView.getHeaderView(0).findViewById(R.id.main_head_name);
-        cityText = (TextView)navigationView.getHeaderView(0).findViewById(R.id.main_head_city);
+        nameText = (TextView) navigationView.getHeaderView(0).findViewById(R.id.main_head_name);
+        cityText = (TextView) navigationView.getHeaderView(0).findViewById(R.id.main_head_city);
     }
 
     @Override
@@ -100,14 +105,14 @@ public class MainActivity extends AppCompatActivity
             presenter.StartFragemt();
 
         } else if (id == R.id.nav_gallery) {
-            presenter. loadPicFragment();
+            presenter.loadPicFragment();
         } else if (id == R.id.nav_note) {
 
         } else if (id == R.id.nav_camera) {
             presenter.startZxing();
         } else if (id == R.id.nav_share) {
-                presenter.showBottomSheet();
-        }else if (id == R.id.nav_weather) {
+            presenter.showBottomSheet();
+        } else if (id == R.id.nav_weather) {
             presenter.jumpToWeatherActivity();
         } else if (id == R.id.nav_set) {
             presenter.jumpToSettingActivity();
@@ -118,8 +123,20 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void onClick(View view){
+    public void onClick(View view) {
         presenter.onClick(view);
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        List<Fragment> fragments = getSupportFragmentManager().getFragments();
+        boolean flag=false;
+        for (int i = 0; i < fragments.size(); i++) {
+            if (fragments.get(i) instanceof NewsFragment){
+                flag= ((NewsFragment) fragments.get(i)).onKeyDown(keyCode,event);
+                break;
+            }
+        }
+        return !flag&&super.onKeyDown(keyCode, event);
+    }
 }

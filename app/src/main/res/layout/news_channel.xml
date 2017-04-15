@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/news_channel_ly"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:visibility="gone"
+    android:clickable="true"
+    android:background="@color/white"
+    android:padding="@dimen/activity_vertical_margin">
+
+        <LinearLayout
+
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="我的频道" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:id="@+id/news_channel_bj"
+                    android:clickable="true"
+                    android:text="编辑" />
+
+            </RelativeLayout>
+
+            <GridView
+                android:numColumns="4"
+                android:id="@+id/news_channel_gv1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:horizontalSpacing="5dp"
+                android:animateLayoutChanges="true">
+
+            </GridView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="可以添加的频道" />
+
+            <GridView
+                android:id="@+id/news_channel_gv2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:numColumns="4"
+                android:horizontalSpacing="5dp"
+                >
+
+            </GridView>
+        </LinearLayout>
+
+</LinearLayout>

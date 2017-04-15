@@ -36,7 +36,18 @@ public class Util {
         SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
        return sdf.format(date);
     }
+    public static <T> List<T> getOutList(List<T> m,List<T> c){
+        List<T> result=new ArrayList<>();
+        for (int i = 0; i < m.size(); i++) {
+            T temp=m.get(i);
+            if (!c.contains(temp))
+                result.add(temp);
 
+        }
+
+
+        return result;
+    }
 
 
 }

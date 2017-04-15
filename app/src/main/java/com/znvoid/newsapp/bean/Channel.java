@@ -36,6 +36,10 @@ public class Channel  {
         this.name = name;
     }
 
-
-
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Channel)
+            return channelId.equals(((Channel) obj).channelId);
+        return false ;
+    }
 }
