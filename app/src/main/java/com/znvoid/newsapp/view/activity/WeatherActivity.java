@@ -27,6 +27,7 @@ import com.znvoid.newsapp.R;
 import com.znvoid.newsapp.Utils.Util;
 import com.znvoid.newsapp.bean.FutureWeather;
 import com.znvoid.newsapp.bean.NowWeather;
+import com.znvoid.newsapp.bean.WeatherIndexInfo;
 import com.znvoid.newsapp.bean.WeatherRespondBody;
 import com.znvoid.newsapp.model.ApiRespond;
 import com.znvoid.newsapp.model.ApiWorkManager;
@@ -58,6 +59,12 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
     private TextView titleCity;
     private TextView titleTime;
     private ImageLoadListener imageLoadListener;
+    private TextView zs_title1;
+    private TextView zs_title2;
+    private TextView zs_title3;
+    private TextView zs_title4;
+    private TextView zs_title5;
+    private TextView zs_title6;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -99,6 +106,13 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
 
 //        weatherInfoText = (TextView) findViewById(R.id.weather_info_text);
         weatherFutureLayout = (LinearLayout) findViewById(R.id.weather_future_layout);
+
+        zs_title1 = (TextView) findViewById(R.id.tq_xs_title_1);
+        zs_title2 = (TextView) findViewById(R.id.tq_xs_title_2);
+        zs_title3 = (TextView) findViewById(R.id.tq_xs_title_3);
+        zs_title4 = (TextView) findViewById(R.id.tq_xs_title_4);
+        zs_title5 = (TextView) findViewById(R.id.tq_xs_title_5);
+        zs_title6 = (TextView) findViewById(R.id.tq_xs_title_6);
 
 
         swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
@@ -153,6 +167,14 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
         pm25Text.setText(nowWeather.getAqiDetail().getPm2_5());
         sdText.setText(nowWeather.getSd());
         qualityText.setText(nowWeather.getAqiDetail().getQuality());
+        WeatherIndexInfo indexInfo=item.getF1().getIndex();
+        zs_title1.setText(indexInfo.getUv().getTitle());
+        zs_title2.setText(indexInfo.getClothes().getTitle());
+        zs_title3.setText(indexInfo.getCold().getTitle());
+        zs_title4.setText(indexInfo.getTravel().getTitle());
+        zs_title5.setText(indexInfo.getSports().getTitle());
+        zs_title6.setText(indexInfo.getWash_car().getTitle());
+
     }
 
     private void showFutureWeather(FutureWeather futureWeather){

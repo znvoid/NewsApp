@@ -327,6 +327,7 @@ public class ApiWorkManager {
                 loadLisenter.onError();
             }
         }).addParemeter("area", area)
+                .addParemeter("needIndex","1")
                 .addParemeter("needMoreDay", "1")
                 .post(queue);
 
@@ -368,7 +369,7 @@ public class ApiWorkManager {
             public void onErrorResponse(VolleyError error) {
                 loadLisenter.onError();
             }
-        }).addParemeter("needMoreDay", "1").post(queue);
+        }).addParemeter("needMoreDay", "1").addParemeter("needIndex","1").post(queue);
 
 
     }

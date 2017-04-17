@@ -23,7 +23,7 @@
         android:layout_height="16dp"
         android:layout_alignParentTop="true"
         android:id="@+id/news_channel_item_img"
-        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/news_channel_item_tv"
         android:src="@drawable/ic_x"
         android:visibility="gone"/>
 </RelativeLayout>

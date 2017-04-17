@@ -11,6 +11,7 @@ public class FutureWeather {
     private String night_air_temperature;
     private String day_air_temperature;
     private  String day;
+    private  WeatherIndexInfo index;
     public FutureWeather() {
     }
 
@@ -52,5 +53,13 @@ public class FutureWeather {
 
     public void setDay(String day) {
         this.day = day;
+    }
+
+    public WeatherIndexInfo getIndex() {
+        return index;
+    }
+
+    public void setIndex(WeatherIndexInfo index) {
+        this.index = index;
     }
 }

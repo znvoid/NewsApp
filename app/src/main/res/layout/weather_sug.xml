@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_margin="15dp"
+    android:background="#8000">
+    <RelativeLayout
+        android:padding="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/tq_xs_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/tq_xs_1" />
+
+        <TextView
+            android:id="@+id/tq_xs_tv_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/tq_xs_1"
+            android:layout_marginLeft="8dp"
+            android:layout_toRightOf="@id/tq_xs_1"
+            android:textColor="#fff"
+            android:text="紫外线指数" />
+
+        <TextView
+            android:id="@+id/tq_xs_title_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tq_xs_tv_1"
+            android:layout_alignRight="@+id/tq_xs_tv_1"
+            android:textColor="#fff"
+            android:text="强" />
+
+
+        <TextView
+            android:id="@+id/tq_xs_tv_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#fff"
+            android:layout_alignParentRight="true"
+            android:text="穿衣指数" />
+
+        <TextView
+            android:id="@+id/tq_xs_title_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tq_xs_tv_2"
+            android:textColor="#fff"
+            android:layout_alignParentRight="true"
+            android:text="舒适" />
+
+        <ImageView
+            android:id="@+id/tq_xs_2"
+            android:layout_marginRight="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/tq_xs_tv_2"
+            android:src="@mipmap/tq_xs_2" />
+
+
+
+    </RelativeLayout>
+
+
+
+
+
+    <!--            -->
+    <RelativeLayout
+        android:padding="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/tq_xs_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/tq_xs_3" />
+
+        <TextView
+            android:id="@+id/tq_xs_tv_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/tq_xs_3"
+            android:layout_marginLeft="8dp"
+            android:layout_toRightOf="@id/tq_xs_3"
+            android:textColor="#fff"
+            android:text="感冒指数" />
+
+        <TextView
+            android:id="@+id/tq_xs_title_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tq_xs_tv_3"
+            android:layout_alignRight="@+id/tq_xs_tv_3"
+            android:textColor="#fff"
+            android:text="易发" />
+
+
+        <TextView
+            android:id="@+id/tq_xs_tv_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#fff"
+            android:layout_alignParentRight="true"
+            android:text="旅游指数" />
+
+        <TextView
+            android:id="@+id/tq_xs_title_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tq_xs_tv_4"
+            android:layout_alignParentRight="true"
+            android:textColor="#fff"
+            android:text="较适宜" />
+
+        <ImageView
+            android:id="@+id/tq_xs_4"
+            android:layout_marginRight="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/tq_xs_tv_4"
+            android:src="@mipmap/tq_xs_4" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:padding="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/tq_xs_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/tq_xs_5" />
+
+        <TextView
+            android:id="@+id/tq_xs_tv_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/tq_xs_5"
+            android:layout_marginLeft="8dp"
+            android:layout_toRightOf="@id/tq_xs_5"
+            android:textColor="#fff"
+            android:text="运动指数" />
+
+        <TextView
+            android:id="@+id/tq_xs_title_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tq_xs_tv_5"
+            android:layout_alignRight="@+id/tq_xs_tv_5"
+            android:textColor="#fff"
+            android:text="较适宜" />
+
+
+        <TextView
+            android:id="@+id/tq_xs_tv_6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#fff"
+            android:layout_alignParentRight="true"
+            android:text="洗车指数" />
+
+        <TextView
+            android:id="@+id/tq_xs_title_6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tq_xs_tv_6"
+            android:layout_alignParentRight="true"
+            android:textColor="#fff"
+            android:text="较适宜" />
+
+        <ImageView
+            android:id="@+id/tq_xs_6"
+            android:layout_marginRight="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/tq_xs_tv_6"
+            android:src="@mipmap/tq_xs_6" />
+    </RelativeLayout>
+
+
+</LinearLayout>
