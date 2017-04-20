@@ -1,6 +1,7 @@
 package com.znvoid.newsapp;
 
 import android.os.Bundle;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
@@ -129,14 +130,21 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        List<Fragment> fragments = getSupportFragmentManager().getFragments();
-        boolean flag=false;
-        for (int i = 0; i < fragments.size(); i++) {
-            if (fragments.get(i) instanceof NewsFragment){
-                flag= ((NewsFragment) fragments.get(i)).onKeyDown(keyCode,event);
-                break;
+        if (keyCode==KeyEvent.KEYCODE_BACK) {
+            if (presenter.getBottomSheetSata() == BottomSheetBehavior.STATE_EXPANDED) {
+                presenter.showBottomSheet();
+                return true;
             }
+            List<Fragment> fragments = getSupportFragmentManager().getFragments();
+            boolean flag = false;
+            for (int i = 0; i < fragments.size(); i++) {
+                if (fragments.get(i) instanceof NewsFragment) {
+                    flag = ((NewsFragment) fragments.get(i)).onKeyDown(keyCode, event);
+                    break;
+                }
+            }
+            return !flag&&super.onKeyDown(keyCode, event);
         }
-        return !flag&&super.onKeyDown(keyCode, event);
+        return super.onKeyDown(keyCode, event);
     }
 }

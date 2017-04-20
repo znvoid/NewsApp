@@ -32,7 +32,7 @@
             android:layout_below="@+id/tq_xs_tv_1"
             android:layout_alignRight="@+id/tq_xs_tv_1"
             android:textColor="#fff"
-            android:text="强" />
+            />
 
 
         <TextView
@@ -50,7 +50,7 @@
             android:layout_below="@id/tq_xs_tv_2"
             android:textColor="#fff"
             android:layout_alignParentRight="true"
-            android:text="舒适" />
+            />
 
         <ImageView
             android:id="@+id/tq_xs_2"
@@ -97,7 +97,7 @@
             android:layout_below="@+id/tq_xs_tv_3"
             android:layout_alignRight="@+id/tq_xs_tv_3"
             android:textColor="#fff"
-            android:text="易发" />
+            />
 
 
         <TextView
@@ -115,7 +115,7 @@
             android:layout_below="@id/tq_xs_tv_4"
             android:layout_alignParentRight="true"
             android:textColor="#fff"
-            android:text="较适宜" />
+            />
 
         <ImageView
             android:id="@+id/tq_xs_4"
@@ -154,7 +154,7 @@
             android:layout_below="@+id/tq_xs_tv_5"
             android:layout_alignRight="@+id/tq_xs_tv_5"
             android:textColor="#fff"
-            android:text="较适宜" />
+             />
 
 
         <TextView
@@ -172,7 +172,7 @@
             android:layout_below="@id/tq_xs_tv_6"
             android:layout_alignParentRight="true"
             android:textColor="#fff"
-            android:text="较适宜" />
+             />
 
         <ImageView
             android:id="@+id/tq_xs_6"

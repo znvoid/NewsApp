@@ -1,5 +1,9 @@
 package com.znvoid.newsapp.Utils;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import com.znvoid.newsapp.view.widget.TimeEvent;
 
 import java.text.SimpleDateFormat;
@@ -49,5 +53,31 @@ public class Util {
         return result;
     }
 
+    /**
+     * 检查网络类型
+     * @param context
+     * @return  0 无网络，1 wifi 网络，2 移动网络
+     */
+    public static int getNetype(Context context) {
+        //结果返回值
+        int netType = 0;
+        //获取手机所有连接管理对象
+        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        //获取NetworkInfo对象
+        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+        //NetworkInfo对象为空 则代表没有网络
+        if (networkInfo == null) {
+            return netType;
+        }
+        //否则 NetworkInfo对象不为空 则获取该networkInfo的类型
+        int nType = networkInfo.getType();
+        if (nType == ConnectivityManager.TYPE_WIFI) {
+            //WIFI
+            netType = 1;
+        } else if (nType == ConnectivityManager.TYPE_MOBILE) {
+            netType= 2;
+        }
+        return netType;
+    }
 
 }

@@ -1,7 +1,12 @@
 package com.znvoid.newsapp.view.activity;
 
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -33,6 +38,7 @@ import com.znvoid.newsapp.model.ApiRespond;
 import com.znvoid.newsapp.model.ApiWorkManager;
 import com.znvoid.newsapp.model.LoadLisenter;
 import com.znvoid.newsapp.presenter.Presenter;
+import com.znvoid.newsapp.view.service.WeatherService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,6 +85,18 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
         setContentView(R.layout.activity_weather);
         initView();
         imageLoadListener = new ImageLoadListener();
+        if (Build.VERSION.SDK_INT >= 21) {
+            JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+            jobScheduler.cancelAll();
+            JobInfo.Builder builder = new JobInfo.Builder( 1,
+                    new ComponentName( getPackageName(),
+                            WeatherService.class.getName() ) );
+            builder.setPeriodic( 6*60*60*1000 )
+            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED);
+            jobScheduler.schedule( builder.build() );
+        }
+
+
     }
 
     /**
@@ -86,14 +104,14 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
      */
     private void initView() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.weather_toolbar);
-        titleCity =(TextView)  findViewById(R.id.weather_title_city);
+        titleCity = (TextView) findViewById(R.id.weather_title_city);
         titleTime = (TextView) findViewById(R.id.weather_title_time);
         setSupportActionBar(toolbar);
         bgPicImg = (ImageView) findViewById(R.id.bing_pic_img);
         weatherLayout = (ScrollView) findViewById(R.id.weather_layout);
 //        titleCity = (TextView) findViewById(R.id.title_city);
 //        titleUpdateTime = (TextView) findViewById(R.id.title_update_time);
-         weatherPic= (ImageView) findViewById(R.id.weather_now_pic);
+        weatherPic = (ImageView) findViewById(R.id.weather_now_pic);
         degreeText = (TextView) findViewById(R.id.weather_now_temp);
         weatherStatText = (TextView) findViewById(R.id.weather_now_stat);
         weatherWindText = (TextView) findViewById(R.id.weather_now_wind);
@@ -118,42 +136,43 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
         swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
         swipeRefresh.setOnRefreshListener(this);
-        if (Presenter.getInstance().getDataFromPerference("weatherUpdataTime","null").equals(Util.getCurrentTime())){
+        if (Presenter.getInstance().getDataFromPerference("weatherUpdataTime", "null").equals(Util.getCurrentTime())) {
 
-            String weatherInfor=Presenter.getInstance().getDataFromPerference("weather","null");
-            if (weatherInfor.equals("null")){
+            String weatherInfor = Presenter.getInstance().getDataFromPerference("weather", "null");
+            if (weatherInfor.equals("null")) {
                 requestNetWork();
-            }else {
+            } else {
                 parseWeatherInfo(weatherInfor);
             }
 
-        }else {
+        } else {
 
-          requestNetWork();
+            requestNetWork();
         }
 
 
     }
-    private void requestNetWork(){
+
+    private void requestNetWork() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getBoolean("yesno_save__info",false)){
-            String city= prefs.getString("user_info_city","杭州");
-            ApiWorkManager.getInstance().getWeather(city,this);
-        }else {
+        if (prefs.getBoolean("yesno_save__info", false)) {
+            String city = prefs.getString("user_info_city", "");
+            ApiWorkManager.getInstance().getWeather(city, this);
+        } else {
             ApiWorkManager.getInstance().getWeather(this);
         }
 
     }
 
 
-    private void showWeather(WeatherRespondBody item){
-        NowWeather nowWeather=item.getNow();
+    private void showWeather(WeatherRespondBody item) {
+        NowWeather nowWeather = item.getNow();
         titleCity.setText(nowWeather.getAqiDetail().getArea());
         titleTime.setText(nowWeather.getTemperature_time());
-        ImageLoader.getInstance().displayImage(nowWeather.getWeather_pic(),weatherPic,imageLoadListener);
+        ImageLoader.getInstance().displayImage(nowWeather.getWeather_pic(), weatherPic, imageLoadListener);
         degreeText.setText(nowWeather.getTemperature());
         weatherStatText.setText(nowWeather.getWeather());
-        weatherWindText.setText(nowWeather.getWind_direction()+"    "+nowWeather.getWind_power());
+        weatherWindText.setText(nowWeather.getWind_direction() + "    " + nowWeather.getWind_power());
         weatherFutureLayout.removeAllViews();
         showFutureWeather(item.getF1());
         showFutureWeather(item.getF2());
@@ -167,7 +186,7 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
         pm25Text.setText(nowWeather.getAqiDetail().getPm2_5());
         sdText.setText(nowWeather.getSd());
         qualityText.setText(nowWeather.getAqiDetail().getQuality());
-        WeatherIndexInfo indexInfo=item.getF1().getIndex();
+        WeatherIndexInfo indexInfo = item.getF1().getIndex();
         zs_title1.setText(indexInfo.getUv().getTitle());
         zs_title2.setText(indexInfo.getClothes().getTitle());
         zs_title3.setText(indexInfo.getCold().getTitle());
@@ -177,36 +196,39 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
 
     }
 
-    private void showFutureWeather(FutureWeather futureWeather){
-        if (futureWeather==null)
+    private void showFutureWeather(FutureWeather futureWeather) {
+        if (futureWeather == null)
             return;
         View view = LayoutInflater.from(this).inflate(R.layout.weather_future_item, weatherFutureLayout, false);
         TextView dateText = (TextView) view.findViewById(R.id.future_weather_date_text);
         ImageView img = (ImageView) view.findViewById(R.id.future_weather_pic);
         TextView infoText = (TextView) view.findViewById(R.id.future_weather_info_text);
         TextView degreeText = (TextView) view.findViewById(R.id.future_weather_temperature_text);
-        String date=futureWeather.getDay().substring(0,4)+"-"+futureWeather.getDay().substring(4,6)+"-"+futureWeather.getDay().substring(6,8);
+        String date = futureWeather.getDay().substring(0, 4) + "-" + futureWeather.getDay().substring(4, 6) + "-" + futureWeather.getDay().substring(6, 8);
         dateText.setText(date);
-        ImageLoader.getInstance().displayImage(futureWeather.getDay_weather_pic(), img,imageLoadListener);
+        ImageLoader.getInstance().displayImage(futureWeather.getDay_weather_pic(), img, imageLoadListener);
         infoText.setText(futureWeather.getDay_weather());
-        degreeText.setText(futureWeather.getDay_air_temperature()+"℃ ～ "+futureWeather.getNight_air_temperature()+"℃");
+        degreeText.setText(futureWeather.getDay_air_temperature() + "℃ ～ " + futureWeather.getNight_air_temperature() + "℃");
         weatherFutureLayout.addView(view);
 
     }
+
     @Override
     public void onComplete(WeatherRespondBody item) {
         swipeRefresh.setRefreshing(false);
         showWeather(item);
     }
+
     @Override
     public void onError() {
         swipeRefresh.setRefreshing(false);
-        Toast.makeText(this,"加载天气失败",Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "加载天气失败", Toast.LENGTH_LONG).show();
     }
 
-    private void parseWeatherInfo(String info){
-        ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(info, new TypeReference<ApiRespond<WeatherRespondBody>>() {});
-        WeatherRespondBody weatherRespondBody=apiRespond.getShowapi_res_body();
+    private void parseWeatherInfo(String info) {
+        ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(info, new TypeReference<ApiRespond<WeatherRespondBody>>() {
+        });
+        WeatherRespondBody weatherRespondBody = apiRespond.getShowapi_res_body();
         showWeather(weatherRespondBody);
     }
 
@@ -218,18 +240,18 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
     private class ImageLoadListener extends SimpleImageLoadingListener {
         @Override
         public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-           if (view!=null&&view instanceof ImageView){
-               String path=imageUri.replace("http://app1.showapi.com/weather/","");
-               try {
-                  InputStream inputStream= getResources().getAssets().open(path);
-                   ((ImageView) view).setImageBitmap(BitmapFactory.decodeStream(inputStream));
+            if (view != null && view instanceof ImageView) {
+                String path = imageUri.replace("http://app1.showapi.com/weather/", "");
+                try {
+                    InputStream inputStream = getResources().getAssets().open(path);
+                    ((ImageView) view).setImageBitmap(BitmapFactory.decodeStream(inputStream));
 
-               } catch (IOException e) {
-                   Log.e(TAG, "onLoadingFailed: 加载图片失败" );
-                   e.printStackTrace();
-               }
+                } catch (IOException e) {
+                    Log.e(TAG, "onLoadingFailed: 加载图片失败");
+                    e.printStackTrace();
+                }
 
-           }
+            }
 
         }
     }

@@ -3,6 +3,7 @@ package com.znvoid.newsapp.model;
 import android.content.Context;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.TypeReference;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
@@ -42,7 +43,8 @@ public class ApiWorkManager {
     }
 
     public void init(Context context) {
-        queue = Volley.newRequestQueue(context);
+        if (queue==null)
+             queue = Volley.newRequestQueue(context);
 
     }
 
@@ -52,8 +54,17 @@ public class ApiWorkManager {
      * @param loadLisenter
      * @param channelId
      */
-    public void getNews(final NewsLoadLisenter<Item> loadLisenter, String channelId) {
-
+    public void getNews(final NewsLoadLisenter<Item> loadLisenter, final String channelId) {
+        if (!Presenter.getInstance().checkNetStat()) {
+            String newsString = Presenter.getInstance().getDataFromPerference("news_" + channelId, "");
+            if (!newsString.equals("")) {
+                List<Item> items = JSONArray.parseArray(newsString, Item.class);
+                loadLisenter.onComplete(items);
+            } else {
+                loadLisenter.onError();
+            }
+            return;
+        }
         new ApiRequest(Api.GET_NEWS_API, new ApiRequest.Listener() {
             @Override
             public void onResponse(String response) {
@@ -67,6 +78,8 @@ public class ApiWorkManager {
                         allpage = pageBean.getAllPages();
                         List<Item> items = pageBean.getContentlist();
                         if (items != null) {
+                            String itemsString = JSON.toJSONString(items);
+                            Presenter.getInstance().saveDataToPreference("news_" + channelId, itemsString);
                             loadLisenter.onComplete(items);
                         } else {
                             loadLisenter.onError();
@@ -103,7 +116,10 @@ public class ApiWorkManager {
      * @param loadLisenter
      */
     public void getNewsChannel(final NewsLoadLisenter<Channel> loadLisenter) {
-
+        if (!Presenter.getInstance().checkNetStat()) {
+            loadLisenter.onError();
+            return;
+        }
         new ApiRequest(Api.GET_CHANNEL_API, new ApiRequest.Listener() {
             @Override
             public void onResponse(String response) {
@@ -119,12 +135,12 @@ public class ApiWorkManager {
                         if (channels != null && channels.size() > 0) {
                             String channelsJsonString = JSON.toJSONString(channels);
                             Presenter.getInstance().saveDataToPreference("newChannels", channelsJsonString);
-                            List<Channel> userChannels=new ArrayList<>();
+                            List<Channel> userChannels = new ArrayList<>();
                             for (int i = 0; i < 10; i++) {
                                 userChannels.add(channels.get(i));
                             }
-                            String userString=JSON.toJSONString(userChannels);
-                            Presenter.getInstance().saveDataToPreference("userNewsChannels",userString);
+                            String userString = JSON.toJSONString(userChannels);
+                            Presenter.getInstance().saveDataToPreference("userNewsChannels", userString);
                             loadLisenter.onComplete(channels);
                         } else {
                             loadLisenter.onError();
@@ -284,9 +300,21 @@ public class ApiWorkManager {
         Presenter.getInstance().pageMark(page);
     }
 
-
     public void getWeather(String area, final LoadLisenter<WeatherRespondBody> loadLisenter) {
-
+        getWeather(area,loadLisenter,true);
+    }
+    public void getWeather(String area, final LoadLisenter<WeatherRespondBody> loadLisenter,boolean flag) {
+        if (flag&&!Presenter.getInstance().checkNetStat()) {
+            String weather = Presenter.getInstance().getDataFromPerference("weather", "");
+            if (!weather.equals("")) {
+                ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(weather, new TypeReference<ApiRespond<WeatherRespondBody>>() {
+                });
+                loadLisenter.onComplete(apiRespond.getShowapi_res_body());
+            } else {
+                loadLisenter.onError();
+            }
+            return;
+        }
         new ApiRequest(Api.GET_WEATHER_BY_EAR_API, new ApiRequest.Listener() {
 
             @Override
@@ -327,19 +355,28 @@ public class ApiWorkManager {
                 loadLisenter.onError();
             }
         }).addParemeter("area", area)
-                .addParemeter("needIndex","1")
+                .addParemeter("needIndex", "1")
                 .addParemeter("needMoreDay", "1")
                 .post(queue);
 
     }
 
     public void getWeather(final LoadLisenter<WeatherRespondBody> loadLisenter) {
-
+        if (!Presenter.getInstance().checkNetStat()){
+            String weather = Presenter.getInstance().getDataFromPerference("weather", "");
+            if (!weather.equals("")) {
+                ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(weather, new TypeReference<ApiRespond<WeatherRespondBody>>() {
+                });
+                loadLisenter.onComplete(apiRespond.getShowapi_res_body());
+            } else {
+                loadLisenter.onError();
+            }
+            return;
+        }
         new ApiRequest(Api.GET_WEATHER_BY_IP_API, new ApiRequest.Listener() {
 
             @Override
             public void onResponse(String response) {
-                // System.out.println(response);
                 try {
                     ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<WeatherRespondBody>>() {
                     });
@@ -369,8 +406,10 @@ public class ApiWorkManager {
             public void onErrorResponse(VolleyError error) {
                 loadLisenter.onError();
             }
-        }).addParemeter("needMoreDay", "1").addParemeter("needIndex","1").post(queue);
+        }).addParemeter("needMoreDay", "1").addParemeter("needIndex", "1").post(queue);
 
 
     }
+
+
 }

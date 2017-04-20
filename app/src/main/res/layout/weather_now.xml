@@ -9,7 +9,7 @@
         android:id="@+id/weather_now_pic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@mipmap/weather_qin"/>
+        />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
         android:gravity="center_horizontal">
 
         <TextView
-            android:text="20"
+
             android:id="@+id/weather_now_temp"
             android:textSize="45sp"
             android:layout_width="wrap_content"
@@ -33,7 +33,7 @@
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/weather_now_stat"
-            android:text="晴"
+
             android:textSize="20sp"
             android:layout_toRightOf="@id/weather_now_temp"
             android:paddingLeft="3dp"
@@ -44,7 +44,7 @@
     </RelativeLayout>
 
     <TextView
-        android:text="南风 3级"
+
         android:id="@+id/weather_now_wind"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />

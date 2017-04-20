@@ -31,6 +31,7 @@
 
         <CheckBoxPreference
             android:layout="@layout/preference_item"
+            android:key="net_onMoblie"
             android:title="3G/4G网络流量"
             android:summaryOff="关闭"
             android:summaryOn="打开"

@@ -20,7 +20,7 @@
             android:id="@+id/future_weather_pic"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="@mipmap/weather_qin"/>
+            />
 
         <TextView
             android:id="@+id/future_weather_info_text"
@@ -29,7 +29,6 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:gravity="left"
-            android:text="晴"
             android:textColor="#fff"/>
     </LinearLayout>
 

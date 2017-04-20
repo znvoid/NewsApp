@@ -19,8 +19,10 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.znvoid.newsapp.MainActivity;
 import com.znvoid.newsapp.R;
+import com.znvoid.newsapp.Utils.Util;
 import com.znvoid.newsapp.bean.Channel;
 import com.znvoid.newsapp.model.ApiWorkManager;
+import com.znvoid.newsapp.model.MyImageDownloader;
 import com.znvoid.newsapp.model.NewsLoadLisenter;
 import com.znvoid.newsapp.view.activity.NewsReadActivity;
 import com.znvoid.newsapp.view.activity.SettingActivity;
@@ -55,8 +57,7 @@ public class Presenter implements NewsLoadLisenter<Channel>,LogicLink{
     }
     public void init(Activity activity){
         activityWeakReference =new WeakReference<MainActivity>((MainActivity) activity);
-        ImageLoaderConfiguration configuration = ImageLoaderConfiguration
-                .createDefault(activity);
+        ImageLoaderConfiguration configuration =new  ImageLoaderConfiguration.Builder(activity).imageDownloader(new MyImageDownloader(activity)).build();
         ImageLoader.getInstance().init(configuration);
         sp = activity.getSharedPreferences("configs", Activity.MODE_PRIVATE);
         long time=sp.getLong("Date",System.currentTimeMillis());
@@ -108,7 +109,27 @@ public class Presenter implements NewsLoadLisenter<Channel>,LogicLink{
 
 
             }else {
-                ApiWorkManager.getInstance().getNewsChannel(this);
+                int netype = Util.getNetype(activityWeakReference.get());
+                switch (netype){
+                    case 0:
+                        Snackbar.make(activityWeakReference.get().getWindow().getDecorView(),"网络异常，去设置",Snackbar.LENGTH_LONG)
+                                .setAction("设置", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        toSetting();
+                                    }
+                                }).show();
+                        break;
+                    case 1:
+                    case 2:
+                        if (checkNetStat()) {
+                            ApiWorkManager.getInstance().getNewsChannel(this);
+                        }else {
+                            showToast("未设置移动网络可用，初始化频道失败！");
+                        }
+                        break;
+                }
+
             }
 
         }
@@ -157,14 +178,8 @@ public class Presenter implements NewsLoadLisenter<Channel>,LogicLink{
 
     @Override
     public void onError() {
-        Snackbar.make(activityWeakReference.get().getWindow().getDecorView(),"网络异常，去设置",Snackbar.LENGTH_INDEFINITE)
-                .setAction("设置", new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toSetting();
-            }
-        }).show();
-//        Toast.makeText( activityWeakReference.get(),"加载失败",Toast.LENGTH_SHORT).show();
+
+        Toast.makeText( activityWeakReference.get(),"获取频道失败",Toast.LENGTH_SHORT).show();
 
     }
 
@@ -226,7 +241,13 @@ public class Presenter implements NewsLoadLisenter<Channel>,LogicLink{
 
     @Override
     public void showBottomSheet() {
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        if (bottomSheetBehavior.getState()==BottomSheetBehavior.STATE_EXPANDED){
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+        }else {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        }
+
     }
 
     public void jumpToSettingActivity(){
@@ -246,5 +267,16 @@ public class Presenter implements NewsLoadLisenter<Channel>,LogicLink{
 
     }
 
+    public boolean checkNetStat(){
+        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(activityWeakReference.get());
+       boolean flag= defaultSharedPreferences.getBoolean("net_onMoblie",false);
+        int type=Util.getNetype(activityWeakReference.get());
+        return flag?type>=1:type==1;
+    }
+    public int  getBottomSheetSata(){
+        if (bottomSheetBehavior!=null)
+            return bottomSheetBehavior.getState();
+        return -1;
+    }
 
 }
