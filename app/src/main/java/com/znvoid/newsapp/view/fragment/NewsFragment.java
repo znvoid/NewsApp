@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.transition.TransitionManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -13,6 +12,9 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -60,6 +62,8 @@ public class NewsFragment extends Fragment {
     private ImageView chooeImg;
     private FragmentStatePagerAdapter viewpagerAdapter;
     private LinearLayout chooeText;
+    private boolean isAnimationStart;
+    private ImageView movingView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -193,17 +197,28 @@ public class NewsFragment extends Fragment {
         mGridView_out.setAdapter(channelAdapter_out);
         mGridView_out.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TransitionManager.beginDelayedTransition(linerLayout);
+            public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
+//                TransitionManager.beginDelayedTransition(linerLayout);
+                if (isAnimationStart)
+                    return;
                 Channel channel= (Channel) channelAdapter_out.getItem(position);
                 outList.remove(position);
-                channels_user.add(channel);
+//                channels_user.add(channel);
+                channelAdapter_user.addLastItem(channel);
+                final int location[]=Util.getViewLocation(view);
+                initMoveView(view);
                 pages.add(null);
                 viewpagerAdapter.notifyDataSetChanged();
                 channelAdapter_user.setSeletPosition(channels_user.size()-1);
                 channelAdapter_out.setSeletPosition(-1);
-                channelAdapter_out.notifyDataSetChanged();
+//                channelAdapter_out.notifyDataSetChanged();
                 channelAdapter_user.notifyDataSetChanged();
+                view.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startMovingAnimation(location,mGridView_useer);
+                    }
+                },50);
 
             }
         });
@@ -212,11 +227,13 @@ public class NewsFragment extends Fragment {
 
 
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
+                if (isAnimationStart)
+                    return;
                 if (channelAdapter_user.isImgFlag()){
                     if (position==0)
                         return;
-                    TransitionManager.beginDelayedTransition(linerLayout);
+//                    TransitionManager.beginDelayedTransition(linerLayout);
                     Channel channel= (Channel) channelAdapter_user.getItem(position);
                     if (channelAdapter_user.getSeletPosition()==position)
                         channelAdapter_user.setSeletPosition(0);
@@ -225,10 +242,20 @@ public class NewsFragment extends Fragment {
                         channelAdapter_user.setSeletPosition(channelAdapter_user.getSeletPosition()-1);
                     channels_user.remove(position);
                     pages.remove(position);
-                    outList.add(channel);
+                    final int location[]=Util.getViewLocation(view);
+                    initMoveView(view);
+                    view.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            startMovingAnimation(location,mGridView_out);
+                        }
+                    },50);
+//                    outList.add(channel);
+                    channelAdapter_out.addLastItem(channel);
                     channelAdapter_out.notifyDataSetChanged();
-                    channelAdapter_user.notifyDataSetChanged();
+//                    channelAdapter_user.notifyDataSetChanged();
                     viewpagerAdapter.notifyDataSetChanged();
+
 
                 }else {
                     channelAdapter_user.setSeletPosition(position);
@@ -256,16 +283,13 @@ public class NewsFragment extends Fragment {
         chooeImg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                startChannelAnimation();
                 if (linerLayout.getVisibility()==View.GONE){
                     chooeImg.setBackgroundResource(R.drawable.ic_tr_up);
-                    chooeText.setVisibility(View.VISIBLE);
-                    linerLayout.setVisibility(View.VISIBLE);
                     channelAdapter_user.setSeletPosition(viewpage.getCurrentItem());
                     channelAdapter_user.notifyDataSetChanged();
                 }else {
                     chooeImg.setBackgroundResource(R.drawable.ic_tr_down);
-                    chooeText.setVisibility(View.GONE);
-                    linerLayout.setVisibility(View.GONE);
                     String s= JSONArray.toJSONString(chanels);
                     Presenter.getInstance().saveDataToPreference("userNewsChannels",s);
                     viewpage.setCurrentItem(channelAdapter_user.getSeletPosition());
@@ -280,4 +304,83 @@ public class NewsFragment extends Fragment {
         }
         return false;
     }
+    private void startChannelAnimation(){
+        final boolean flag=(linerLayout.getVisibility()==View.VISIBLE);
+
+        Animation animation=flag?AnimationUtils.loadAnimation(getContext(),R.anim.slide_out_top):
+                AnimationUtils.loadAnimation(getContext(),R.anim.slide_in_top);
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                if (flag){
+                    linerLayout.setVisibility(View.GONE);
+                    chooeText.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        chooeText.setVisibility(View.VISIBLE);
+        linerLayout.setVisibility(View.VISIBLE);
+        linerLayout.startAnimation(animation);
+
+    }
+
+    private void startMovingAnimation(int[] locationStart, final GridView gridView){
+
+        int[] locationEnd=Util.getViewLocation(gridView.getChildAt(gridView.getLastVisiblePosition()));
+
+        TranslateAnimation transAnima = new TranslateAnimation(locationStart[0], locationEnd[0], locationStart[1],
+                locationEnd[1]);
+        transAnima.setDuration(300);
+//        transAnima.setFillAfter(true);
+        transAnima.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                isAnimationStart = true;
+                movingView.setVisibility(View.VISIBLE);
+                if (gridView==mGridView_useer){
+                    channelAdapter_out.notifyDataSetChanged();
+                }else {
+                    channelAdapter_user.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                isAnimationStart = false;
+                ( (ViewGroup) getActivity().getWindow().getDecorView()).removeView(movingView);
+                movingView=null;
+                ChannelAdapter adapter = (ChannelAdapter) gridView.getAdapter();
+                adapter.setlastInvisiable();
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        movingView.startAnimation(transAnima);
+    }
+
+    private void initMoveView(View view) {
+        movingView = Util.getDrawingCacheView(view);
+        //获取窗口容器
+        ViewGroup  windowViewGroup= (ViewGroup) getActivity().getWindow().getDecorView();
+        //再将moveView添加到父容器中
+        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT ,ViewGroup.LayoutParams.WRAP_CONTENT );
+        movingView.setLayoutParams(params);
+        movingView.setVisibility(View.GONE);
+        windowViewGroup.addView(movingView);
+    }
+
 }

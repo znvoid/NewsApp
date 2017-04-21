@@ -23,6 +23,7 @@ public class ChannelAdapter extends BaseAdapter {
     private int seletPosition=-1;
     private boolean imgFlag;
     private boolean userFlag;
+    private boolean lastInvisiable;
     public ChannelAdapter(List<Channel> channels,boolean userFlag) {
         this.channels = channels!=null?channels:new ArrayList<Channel>();
         this.userFlag=userFlag;
@@ -63,6 +64,13 @@ public class ChannelAdapter extends BaseAdapter {
         }else {
             holder.imageView.setVisibility(View.GONE);
         }
+        if (lastInvisiable&&position==channels.size()-1){
+            holder.textView.setVisibility(View.GONE);
+            holder.imageView.setVisibility(View.GONE);
+        }else {
+            holder.textView.setVisibility(View.VISIBLE);
+        }
+
         return convertView;
     }
     private class ViewHolder implements View.OnTouchListener {
@@ -118,4 +126,15 @@ public class ChannelAdapter extends BaseAdapter {
 
         }
     };
+
+    public void addLastItem(Channel channel){
+        lastInvisiable=true;
+        channels.add(channel);
+        notifyDataSetChanged();
+    }
+    public void setlastInvisiable(){
+        lastInvisiable=false;
+        notifyDataSetChanged();
+    }
+
 }

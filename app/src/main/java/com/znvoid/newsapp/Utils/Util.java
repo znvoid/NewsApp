@@ -1,8 +1,11 @@
 package com.znvoid.newsapp.Utils;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.znvoid.newsapp.view.widget.TimeEvent;
 
@@ -80,4 +83,29 @@ public class Util {
         return netType;
     }
 
+    /**
+     * 复制view
+     * @param view
+     * @return
+     */
+    public static ImageView getDrawingCacheView(View view) {
+        view.destroyDrawingCache();
+        view.setDrawingCacheEnabled(true);
+        Bitmap cache = Bitmap.createBitmap(view.getDrawingCache());
+        view.setDrawingCacheEnabled(false);
+        ImageView iv = new ImageView(view.getContext());
+        iv.setImageBitmap(cache);
+        return iv;
+    }
+
+    /**
+     * 获取View 在当前窗口中的位置坐标
+     * @param view 要获取位置的view
+     * @return 坐标数组 ，int[0] 为x坐标，int[1] 为y坐标
+     */
+    public static int[] getViewLocation(View view){
+        int[] locaton=new int[2];
+        view.getLocationInWindow(locaton);
+        return locaton;
+    }
 }
