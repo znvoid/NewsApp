@@ -13,7 +13,7 @@ public class NewsContentRespondBody {
     private List<Img> img_list;
     private String  time;
     private String title;
-    private String all_list;//title img_list content 集合
+
 
     public NewsContentRespondBody() {
     }
@@ -58,11 +58,5 @@ public class NewsContentRespondBody {
         this.title = title;
     }
 
-    public String getAll_list() {
-        return all_list;
-    }
 
-    public void setAll_list(String all_list) {
-        this.all_list = all_list;
-    }
 }

@@ -10,6 +10,7 @@
     <string name="title_news">新闻阅读</string>
     <string name="news_read">新闻阅读</string>
     <string name="activity_weather">天气</string>
+    <string name="activity_note">笔记</string>
 
 
 </resources>

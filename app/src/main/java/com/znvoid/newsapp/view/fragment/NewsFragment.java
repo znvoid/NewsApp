@@ -21,8 +21,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.znvoid.newsapp.R;
 import com.znvoid.newsapp.Utils.Util;
 import com.znvoid.newsapp.bean.Channel;
@@ -177,9 +177,10 @@ public class NewsFragment extends Fragment {
         linerLayout = (LinearLayout)parentView.findViewById(R.id.news_channel_ly);
 
         String spString =  Presenter.getInstance().getDataFromPerference("newChannels", "{}");
-        List<Channel> channels_all = JSON.parseArray(spString, Channel.class);
+        Gson gson=new Gson();
+        List<Channel> channels_all =gson.fromJson(spString,new TypeToken<List<Channel>>(){}.getType());
         String spString1 = Presenter.getInstance().getDataFromPerference("userNewsChannels", "{}");
-        channels_user =JSON.parseArray(spString1,Channel.class);
+        channels_user =gson.fromJson(spString1,new TypeToken<List<Channel>>(){}.getType());
         if (channels_user!=null)
             chanels=channels_user;
         outList = Util.getOutList(channels_all, channels_user);
@@ -290,7 +291,8 @@ public class NewsFragment extends Fragment {
                     channelAdapter_user.notifyDataSetChanged();
                 }else {
                     chooeImg.setBackgroundResource(R.drawable.ic_tr_down);
-                    String s= JSONArray.toJSONString(chanels);
+                    Gson gson=new Gson();
+                    String s= gson.toJson(chanels);
                     Presenter.getInstance().saveDataToPreference("userNewsChannels",s);
                     viewpage.setCurrentItem(channelAdapter_user.getSeletPosition());
                 }

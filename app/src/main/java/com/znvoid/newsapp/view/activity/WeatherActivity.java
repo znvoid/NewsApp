@@ -2,8 +2,11 @@ package com.znvoid.newsapp.view.activity;
 
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -23,13 +26,11 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+import com.google.gson.reflect.TypeToken;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.znvoid.newsapp.R;
-import com.znvoid.newsapp.Utils.Util;
 import com.znvoid.newsapp.bean.FutureWeather;
 import com.znvoid.newsapp.bean.NowWeather;
 import com.znvoid.newsapp.bean.WeatherIndexInfo;
@@ -42,6 +43,7 @@ import com.znvoid.newsapp.view.service.WeatherService;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * Created by zn on 2017/4/13.
@@ -71,6 +73,16 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
     private TextView zs_title4;
     private TextView zs_title5;
     private TextView zs_title6;
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean updata = intent.getBooleanExtra("weather_updata", false);
+            if (updata) {
+                parseWeatherInfo(Presenter.getInstance().getDataFromPerference("weather", "null"));
+            }
+        }
+    };
+    private static long AWAKE_ITME=30 * 60 * 1000;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,16 +99,29 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
         imageLoadListener = new ImageLoadListener();
         if (Build.VERSION.SDK_INT >= 21) {
             JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-            jobScheduler.cancelAll();
-            JobInfo.Builder builder = new JobInfo.Builder( 1,
-                    new ComponentName( getPackageName(),
-                            WeatherService.class.getName() ) );
-            builder.setPeriodic( 6*60*60*1000 )
-            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED);
-            jobScheduler.schedule( builder.build() );
+            List<JobInfo> allPendingJobs = jobScheduler.getAllPendingJobs();
+
+//            for (int i = 0; i < allPendingJobs.size(); i++) {
+//                Log.e("weather",allPendingJobs.get(i).getId()+"");
+//
+//            }
+//            jobScheduler.cancelAll();
+            JobInfo.Builder builder = new JobInfo.Builder(1,
+                    new ComponentName(getPackageName(),
+                            WeatherService.class.getName()));
+            builder.setPeriodic(AWAKE_ITME)
+                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED);
+            jobScheduler.schedule(builder.build());
+        }else {
+//            Intent _Intent = new Intent(getApplicationContext(), WeatherService2.class);
+//            PendingIntent _PendingIntent = PendingIntent.getService(this, 0, _Intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//            AlarmManager _AlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+//            _AlarmManager.cancel(_PendingIntent);
+//            _AlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + AWAKE_ITME, AWAKE_ITME, _PendingIntent);
         }
-
-
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("com.znvoid.nwasapp.weather_updata");
+        registerReceiver(mBroadcastReceiver,filter);
     }
 
     /**
@@ -136,20 +161,20 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
         swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
         swipeRefresh.setOnRefreshListener(this);
-        if (Presenter.getInstance().getDataFromPerference("weatherUpdataTime", "null").equals(Util.getCurrentTime())) {
+
+//        if (Presenter.getInstance().getDataFromPerference("weatherUpdataTime", "null").equals(Util.getCurrentTime())) {
 
             String weatherInfor = Presenter.getInstance().getDataFromPerference("weather", "null");
             if (weatherInfor.equals("null")) {
-                requestNetWork();
+//                requestNetWork();
             } else {
                 parseWeatherInfo(weatherInfor);
             }
 
-        } else {
-
-            requestNetWork();
-        }
-
+//        } else {
+//
+//            requestNetWork();
+//        }
 
     }
 
@@ -226,8 +251,7 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
     }
 
     private void parseWeatherInfo(String info) {
-        ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(info, new TypeReference<ApiRespond<WeatherRespondBody>>() {
-        });
+        ApiRespond<WeatherRespondBody> apiRespond = ApiRespond.parserJsonString(info,new TypeToken<ApiRespond<WeatherRespondBody>>(){});
         WeatherRespondBody weatherRespondBody = apiRespond.getShowapi_res_body();
         showWeather(weatherRespondBody);
     }
@@ -254,5 +278,11 @@ public class WeatherActivity extends AppCompatActivity implements LoadLisenter<W
             }
 
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mBroadcastReceiver);
     }
 }

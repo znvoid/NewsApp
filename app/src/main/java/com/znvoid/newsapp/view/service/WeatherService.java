@@ -2,6 +2,7 @@ package com.znvoid.newsapp.view.service;
 
 import android.app.job.JobParameters;
 import android.app.job.JobService;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
@@ -9,11 +10,11 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.reflect.TypeToken;
 import com.znvoid.newsapp.Utils.Util;
 import com.znvoid.newsapp.bean.Api;
 import com.znvoid.newsapp.bean.WeatherRespondBody;
@@ -29,15 +30,25 @@ public class WeatherService extends JobService implements ApiRequest.Listener {
     private Handler mHander = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-           if (msg.obj instanceof JobParameters){
-               params= (JobParameters) msg.obj;
-               updataWeather();
-           }
+
+                switch (msg.what) {
+                    case 1:
+                    if (msg.obj instanceof JobParameters) {
+                        params = (JobParameters) msg.obj;
+
+                    }
+                    case 2:
+                        updataWeather();
+                        break;
+                }
+
+
 
         }
     };
     private RequestQueue requestQueue;
     private JobParameters params;
+
 
     @Override
     public boolean onStartJob(JobParameters params) {
@@ -47,7 +58,15 @@ public class WeatherService extends JobService implements ApiRequest.Listener {
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Message message = mHander.obtainMessage(2);
+        mHander.sendMessage(message);
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
     public boolean onStopJob(JobParameters params) {
+        this.params=null;
         return false;
     }
 
@@ -76,14 +95,13 @@ public class WeatherService extends JobService implements ApiRequest.Listener {
     public void onResponse(String response) {
 
         try {
-            ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<WeatherRespondBody>>() {
-            });
+            ApiRespond<WeatherRespondBody> apiRespond = ApiRespond.parserJsonString(response,new TypeToken<ApiRespond<WeatherRespondBody>>(){});
             if (apiRespond.getShowapi_res_code() == 0) {
                 WeatherRespondBody weatherRespondBody = apiRespond.getShowapi_res_body();
                 if (weatherRespondBody.getRet_code() == 0) {
                     SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                     defaultSharedPreferences.edit().putString("weather",response).putString("weatherUpdataTime",Util.getCurrentTime()).commit();
-
+                    sendWeatherUpdataBroadcast();
 
                 } else if (weatherRespondBody.getRet_code() == -1) {
                     requestQueue = Volley.newRequestQueue(getApplicationContext());
@@ -107,8 +125,19 @@ public class WeatherService extends JobService implements ApiRequest.Listener {
     public void onErrorResponse(VolleyError error) {
         requestQueue.stop();
         requestQueue=null;
-        jobFinished( params, true );
-        params=null;
+        if (params!=null) {
+            jobFinished(params, true);
+            params = null;
+        }
     }
+
+    private void sendWeatherUpdataBroadcast(){
+        Intent intent=new Intent();
+        intent.setAction("com.znvoid.nwasapp.weather_updata");
+        intent.putExtra("weather_updata",true);
+        sendBroadcast(intent);
+
+    }
+
 }
 

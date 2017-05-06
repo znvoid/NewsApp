@@ -1,5 +1,10 @@
 package com.znvoid.newsapp.model;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+
 /**
  * Created by zn on 2017/4/9.
  */
@@ -37,4 +42,13 @@ public class ApiRespond<T> {
     public void setShowapi_res_body(T showapi_res_body) {
         this.showapi_res_body = showapi_res_body;
     }
+    public static <T> ApiRespond<T> parserJsonString(String jsonString,TypeToken<ApiRespond<T>> typeToken ){
+        Gson gson = new Gson();
+//        Type jsonType = new TypeToken<ApiRespond<T> >() {
+//        }.getType();
+        Type jsonType= typeToken.getType();
+
+        return   gson.fromJson(jsonString, jsonType);
+    }
+
 }

@@ -2,12 +2,11 @@ package com.znvoid.newsapp.model;
 
 import android.content.Context;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.TypeReference;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.znvoid.newsapp.Utils.Util;
 import com.znvoid.newsapp.bean.Api;
 import com.znvoid.newsapp.bean.Channel;
@@ -38,8 +37,9 @@ public class ApiWorkManager {
     public static ApiWorkManager getInstance() {
         return ourInstance;
     }
-
+    private Gson gson;
     private ApiWorkManager() {
+        gson=new Gson();
     }
 
     public void init(Context context) {
@@ -58,7 +58,7 @@ public class ApiWorkManager {
         if (!Presenter.getInstance().checkNetStat()) {
             String newsString = Presenter.getInstance().getDataFromPerference("news_" + channelId, "");
             if (!newsString.equals("")) {
-                List<Item> items = JSONArray.parseArray(newsString, Item.class);
+                List<Item> items = gson.fromJson(newsString, new TypeToken<List<Item>>() {}.getType());
                 loadLisenter.onComplete(items);
             } else {
                 loadLisenter.onError();
@@ -70,15 +70,16 @@ public class ApiWorkManager {
             public void onResponse(String response) {
 
                 try {
-                    ApiRespond<NewsRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<NewsRespondBody>>() {
-                    });
 
+//                    ApiRespond<NewsRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<NewsRespondBody>>() {
+//                    });
+                    ApiRespond<NewsRespondBody> apiRespond=ApiRespond.parserJsonString(response,new TypeToken<ApiRespond<NewsRespondBody>>(){});
                     if (apiRespond.getShowapi_res_code() == 0) {
                         PageBean pageBean = apiRespond.getShowapi_res_body().getPagebean();
                         allpage = pageBean.getAllPages();
                         List<Item> items = pageBean.getContentlist();
                         if (items != null) {
-                            String itemsString = JSON.toJSONString(items);
+                            String itemsString = gson.toJson(items);
                             Presenter.getInstance().saveDataToPreference("news_" + channelId, itemsString);
                             loadLisenter.onComplete(items);
                         } else {
@@ -125,21 +126,22 @@ public class ApiWorkManager {
             public void onResponse(String response) {
                 response = response.replaceAll("焦点", "");
                 try {
-                    ApiRespond<ChannelRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<ChannelRespondBody>>() {
-                    });
-
+//                    ApiRespond<ChannelRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<ChannelRespondBody>>() {
+//                    });
+                    ApiRespond<ChannelRespondBody> apiRespond=ApiRespond.parserJsonString(response ,new TypeToken<ApiRespond<ChannelRespondBody>>(){});
                     if (apiRespond.getShowapi_res_code() == 0) {
 
                         ChannelRespondBody body = apiRespond.getShowapi_res_body();
                         List<Channel> channels = body.getChannelList();
                         if (channels != null && channels.size() > 0) {
-                            String channelsJsonString = JSON.toJSONString(channels);
+                            String channelsJsonString = gson.toJson(channels);
                             Presenter.getInstance().saveDataToPreference("newChannels", channelsJsonString);
                             List<Channel> userChannels = new ArrayList<>();
                             for (int i = 0; i < 10; i++) {
                                 userChannels.add(channels.get(i));
                             }
-                            String userString = JSON.toJSONString(userChannels);
+//                            String userString = JSON.toJSONString(userChannels);
+                            String userString =gson.toJson(userChannels);;
                             Presenter.getInstance().saveDataToPreference("userNewsChannels", userString);
                             loadLisenter.onComplete(channels);
                         } else {
@@ -177,9 +179,9 @@ public class ApiWorkManager {
             public void onResponse(String response) {
 
                 try {
-                    ApiRespond<PictureRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<PictureRespondBody>>() {
-                    });
-
+//                    ApiRespond<PictureRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<PictureRespondBody>>() {
+//                    });
+                    ApiRespond<PictureRespondBody> apiRespond=ApiRespond.parserJsonString(response,new TypeToken<ApiRespond<PictureRespondBody>>(){});
                     if (apiRespond.getShowapi_res_code() == 0) {
                         PictureRespondBody body = apiRespond.getShowapi_res_body();
                         if (body.getCode().equals("200")) {
@@ -228,8 +230,9 @@ public class ApiWorkManager {
             public void onResponse(String response) {
 
                 try {
-                    ApiRespond<NewsContentRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<NewsContentRespondBody>>() {
-                    });
+//                    ApiRespond<NewsContentRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<NewsContentRespondBody>>() {
+//                    });
+                    ApiRespond<NewsContentRespondBody> apiRespond=ApiRespond.parserJsonString(response,new TypeToken<ApiRespond<NewsContentRespondBody>>(){});
                     if (apiRespond.getShowapi_res_code() == 0) {
 
                         loadLisenter.onComplete(apiRespond.getShowapi_res_body());
@@ -267,8 +270,9 @@ public class ApiWorkManager {
             public void onResponse(String response) {
                 // System.out.println(response);
                 try {
-                    ApiRespond<ExpressRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<ExpressRespondBody>>() {
-                    });
+//                    ApiRespond<ExpressRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<ExpressRespondBody>>() {
+//                    });
+                    ApiRespond<ExpressRespondBody> apiRespond=ApiRespond.parserJsonString(response,new TypeToken<ApiRespond<ExpressRespondBody>>(){});
                     if (apiRespond.getShowapi_res_code() == 0 && "000".equals(apiRespond.getShowapi_res_body().getError_code())) {
 
                         loadLisenter.onComplete(apiRespond.getShowapi_res_body());
@@ -307,8 +311,9 @@ public class ApiWorkManager {
         if (flag&&!Presenter.getInstance().checkNetStat()) {
             String weather = Presenter.getInstance().getDataFromPerference("weather", "");
             if (!weather.equals("")) {
-                ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(weather, new TypeReference<ApiRespond<WeatherRespondBody>>() {
-                });
+//                ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(weather, new TypeReference<ApiRespond<WeatherRespondBody>>() {
+//                });
+                ApiRespond<WeatherRespondBody> apiRespond=ApiRespond.parserJsonString(weather,new TypeToken<ApiRespond<WeatherRespondBody>>(){});
                 loadLisenter.onComplete(apiRespond.getShowapi_res_body());
             } else {
                 loadLisenter.onError();
@@ -321,8 +326,9 @@ public class ApiWorkManager {
             public void onResponse(String response) {
                 // System.out.println(response);
                 try {
-                    ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<WeatherRespondBody>>() {
-                    });
+//                    ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<WeatherRespondBody>>() {
+//                    });
+                    ApiRespond<WeatherRespondBody> apiRespond=ApiRespond.parserJsonString(response,new TypeToken<ApiRespond<WeatherRespondBody>>(){});
                     if (apiRespond.getShowapi_res_code() == 0) {
                         WeatherRespondBody weatherRespondBody = apiRespond.getShowapi_res_body();
                         if (weatherRespondBody.getRet_code() == 0) {
@@ -365,8 +371,9 @@ public class ApiWorkManager {
         if (!Presenter.getInstance().checkNetStat()){
             String weather = Presenter.getInstance().getDataFromPerference("weather", "");
             if (!weather.equals("")) {
-                ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(weather, new TypeReference<ApiRespond<WeatherRespondBody>>() {
-                });
+//                ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(weather, new TypeReference<ApiRespond<WeatherRespondBody>>() {
+//                });
+                ApiRespond<WeatherRespondBody> apiRespond=ApiRespond.parserJsonString(weather,new TypeToken<ApiRespond<WeatherRespondBody>>(){});
                 loadLisenter.onComplete(apiRespond.getShowapi_res_body());
             } else {
                 loadLisenter.onError();
@@ -378,8 +385,9 @@ public class ApiWorkManager {
             @Override
             public void onResponse(String response) {
                 try {
-                    ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<WeatherRespondBody>>() {
-                    });
+//                    ApiRespond<WeatherRespondBody> apiRespond = JSON.parseObject(response, new TypeReference<ApiRespond<WeatherRespondBody>>() {
+//                    });
+                    ApiRespond<WeatherRespondBody> apiRespond=ApiRespond.parserJsonString(response,new TypeToken<ApiRespond<WeatherRespondBody>>(){});
                     if (apiRespond.getShowapi_res_code() == 0) {
                         WeatherRespondBody weatherRespondBody = apiRespond.getShowapi_res_body();
                         if (weatherRespondBody.getRet_code() == 0) {

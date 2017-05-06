@@ -14,7 +14,8 @@ import android.support.v4.widget.NestedScrollView;
 import android.view.View;
 import android.widget.Toast;
 
-import com.alibaba.fastjson.JSON;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.znvoid.newsapp.MainActivity;
@@ -29,6 +30,7 @@ import com.znvoid.newsapp.view.activity.SettingActivity;
 import com.znvoid.newsapp.view.activity.WeatherActivity;
 import com.znvoid.newsapp.view.activity.ZXingActivity;
 import com.znvoid.newsapp.view.fragment.NewsFragment;
+import com.znvoid.newsapp.view.fragment.NoteListFragment;
 import com.znvoid.newsapp.view.fragment.PictureFragemnt;
 import com.znvoid.newsapp.view.widget.LoadingView;
 import com.znvoid.newsapp.view.widget.ShowImagePopup;
@@ -86,7 +88,8 @@ public class Presenter implements NewsLoadLisenter<Channel>,LogicLink{
         LoadingView view= (LoadingView) activityWeakReference.get().findViewById(R.id.content_loadingview);
         String userChannelsString= getDataFromPerference("userNewsChannels","");
         if (userChannelsString!=null&&!userChannelsString.equals("")){
-            final List<Channel> channels = JSON.parseArray(userChannelsString, Channel.class);
+            Gson gson=new Gson();
+            final List<Channel> channels =  gson.fromJson(userChannelsString,new TypeToken<List<Channel>>(){}.getType());
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -98,7 +101,8 @@ public class Presenter implements NewsLoadLisenter<Channel>,LogicLink{
 
             String channelsString= getDataFromPerference("newsChannels","");
             if (channelsString!=null&&!channelsString.equals("")){
-                final List<Channel> channels = JSON.parseArray(channelsString, Channel.class);
+                Gson gson=new Gson();
+                final List<Channel> channels =  gson.fromJson(userChannelsString,new TypeToken<List<Channel>>(){}.getType());
 
                 mHandler.postDelayed(new Runnable() {
                     @Override
@@ -279,4 +283,10 @@ public class Presenter implements NewsLoadLisenter<Channel>,LogicLink{
         return -1;
     }
 
+    public void showNotes() {
+        NoteListFragment nteListFragment=new NoteListFragment();
+        activityWeakReference.get().getSupportFragmentManager().beginTransaction()
+                .replace(R.id.content_fragment,nteListFragment).commit();
+        activityWeakReference.get().getSupportActionBar().setTitle("笔记");
+    }
 }

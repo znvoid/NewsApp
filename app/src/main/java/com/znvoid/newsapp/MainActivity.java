@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_gallery) {
             presenter.loadPicFragment();
         } else if (id == R.id.nav_note) {
-
+            presenter.showNotes();
         } else if (id == R.id.nav_camera) {
             presenter.startZxing();
         } else if (id == R.id.nav_share) {

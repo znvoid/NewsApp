@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+    <dbname value="note" />		<!-- db文件名  -->
+    <version value="1" />			<!-- 数据库版本  -->
+    <list>					<!-- 数据库表集 通过<mapping> 标签的class 属性指定类名  -->
+        <mapping class="com.znvoid.newsapp.bean.NoteBean" />
+    </list>
+    <storage value="internal" />
+</litepal>
